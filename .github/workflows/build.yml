@@ -1,0 +1,87 @@
+# This workflow will run lint and tests using node when a release is created
+
+name: build
+
+on: ["push", "pull_request"]
+
+jobs:
+
+  publish-gpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+#          registry-url: https://npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}}
+        env:          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - run: npm info tcp-ping-port
+#       - run: npm config ls -l
+#       - run: echo registry=https://npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
+#       - run: npm config ls -l
+#       - run: npm info tcp-ping-port
+#       - run: npm info tcp-ping-port
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+#       - name: Get latest NPM version
+#         id: latest_package_ver
+#         shell: bash
+#         run: |
+#           var=$(npm info tcp-ping-port dist-tags.latest)
+#           echo "::set-output name=version::$var"
+                  
+      - name: Publish package to GitHub Package Registry (if the version is not published yet)
+#         if: steps.latest_package_ver.outputs.version != github.event.release.tag_name
+        env:          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           TAG: "${{ github.event.release.tag_name }}"
+#           LATEST_PKG_VER: ${{ steps.latest_package_ver.outputs.version }}
+        run: |
+          echo "Publishing new NPM Package version $TAG (previous version $LATEST_PKG_VER)"
+          npm ci
+          npm info boseca/ci
+          npm publish
+          npm info boseca/ci
+          npm info react-bootstrap-table
+          npm info zerorpc --registry=https://npm.pkg.github.com/
+          npm info greact-bootstrap-table2
+          npm login --registry=https://npm.pkg.github.com/
+
+      - run: npm info tcp-ping-port
+      - run: npm info tcp-ping-port dist-tags.latest
+
+
+#   publish-npm:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v1
+#         with:
+#           node-version: 12
+#           registry-url: https://registry.npmjs.org/
+        
+#       - name: Get latest NPM version
+#         id: latest_package_ver
+#         shell: bash
+#         run: |
+#           var=$(npm info tcp-ping-port dist-tags.latest)
+#           echo "::set-output name=version::$var"
+                    
+#       - name: Publish package to NPM (if the version is not published yet)
+#         if: steps.latest_package_ver.outputs.version != github.event.release.tag_name
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+#           TAG: "${{ github.event.release.tag_name }}"
+#           LATEST_PKG_VER: ${{ steps.latest_package_ver.outputs.version }}
+#         run: |
+#           echo "Publishing new NPM Package version $TAG (previous version $LATEST_PKG_VER)"
+#           echo npm ci
+#           echo npm publish --access public
+#           npm info tcp-ping-port
+#           npm info react-bootstrap-table
+#           npm info greact-bootstrap-table2
+

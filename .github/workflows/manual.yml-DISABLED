@@ -1,0 +1,143 @@
+name: Auto-publish
+# on: push
+on: pull_request
+
+jobs:
+#   check:
+#     name: Check version and tag
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v1
+#       - name: Get package version
+#         shell: bash
+#         id: package_version
+#         run: |
+#           ver=$(jq .version package.json | sed -e "s/^\"//" -e "s/\"//")
+#           echo "::set-output name=version::$ver"
+#       - name: Compare package version and release tag
+#         if: steps.package_version.outputs.version != github.event.release.tag_name
+#         env:
+#           TAG: "${{ github.event.release.tag_name }}"
+#           PKG_VER: ${{ steps.package_version.outputs.version }}
+#         run: |
+#           echo "Mismatch NPM version $PKG_VER and git tag $TAG"
+#           exit 1
+#   build:
+#     name: Lint and test
+#     needs: check
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v1
+#         with:
+#           node-version: 12
+#       - run: npm ci
+#       - run: npm test
+
+
+  publish:
+    name: Publish to NPM & GitHub Package Registry
+    runs-on: ubuntu-latest
+#     if: contains(github.ref, 'master') # Publish it only if the push comes from the master branch.
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get NPM package version using npm info
+        shell: bash
+        id: package_npm_ver
+        run: |
+          var=$(npm info tcp-ping-port | grep latest | awk -F': ' '{ print $2 }')
+          echo "::set-output name=version::$var"
+          echo "VERSION:" $var
+          echo $(npm -v)
+          echo $(npm info tcp-ping-port | grep latest)
+
+      - name: It is already published
+        if: steps.package_npm_ver.outputs.version == github.event.release.tag_name
+        env:
+          TAG: "${{ github.event.release.tag_name }}"
+          PKG_VER: ${{ steps.package_npm_ver.outputs.version }}
+        run: |
+          echo "NPM Package version $PKG_VER with git tag $TAG is already published to NPM"
+
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+#         with:
+#           ref: master
+
+#       - name: Check version changes
+#         uses: EndBug/version-check@v1
+#         id: check
+
+#       - name: Version update detected
+#         if: steps.check.outputs.changed == 'true'
+#         run: 'echo "Version change found! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
+
+#       - name: Set up Node.js for NPM
+#         if: steps.check.outputs.changed == 'true'
+#         uses: actions/setup-node@v1
+#         with:
+#           registry-url: "https://registry.npmjs.org"
+
+#       - name: Install dependencies
+#         if: steps.check.outputs.changed == 'true'
+#         run: npm install --only=prod
+
+#       - name: Publish package to NPM
+#         if: steps.check.outputs.changed == 'true'
+#         run: npm publish
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+#       - name: Set up Node.js for GPR
+#         if: steps.check.outputs.changed == 'true'
+#         uses: actions/setup-node@v1
+#         with:
+#           registry-url: "https://npm.pkg.github.com/"
+#           scope: "@endbug"
+
+#       - name: Set up package for GPR # You need to make sure you package name has the scope needed for GPR
+#         if: steps.check.outputs.changed == 'true'
+#         run: npm run gpr-setup
+
+#       - name: Publish package to GPR
+#         if: steps.check.outputs.changed == 'true'
+#         run: npm publish
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       - uses: actions/checkout@v2
+      - name: Publish package to NPM - setup
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+
+      - name: Publish package to NPM - publish
+        if: steps.package_npm_ver.outputs.version != github.event.release.tag_name
+        run: |
+          echo "Do publishing"
+          echo npm ci
+          echo npm publish
+          node -v
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+#       - uses: actions/checkout@v2
+      - name: Publish package to GPR - setup
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+          registry-url: https://npm.pkg.github.com/
+
+      - name: Publish package to GPR - publish 
+        if: steps.package_npm_ver.outputs.version != github.event.release.tag_name
+        run: |
+          echo "Helloo"
+          echo "World"
+          echo npm ci
+          echo npm publish          
+          node -v
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        
