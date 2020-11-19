@@ -6,7 +6,7 @@ name: npm release
 # on: ["push", "pull_request"]
 on:
   release:
-    types: [published, edited]
+    types: [published, edited, released]
 
 jobs:
   check:
